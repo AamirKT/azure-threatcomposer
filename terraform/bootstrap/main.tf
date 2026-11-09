@@ -1,6 +1,9 @@
 resource "azurerm_resource_group" "tfstate_rg" {
   name     = var.resource_group_name
   location = var.location
+  tags = {
+    Name = var.resource_group_name
+  }
 }
 
 resource "azurerm_storage_account" "tfstate" {
@@ -12,6 +15,9 @@ resource "azurerm_storage_account" "tfstate" {
   https_traffic_only_enabled      = true
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
+  tags = {
+    Name = var.storage_account_name
+  }
 }
 
 resource "azurerm_storage_container" "tfstate" {
