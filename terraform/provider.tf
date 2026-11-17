@@ -10,7 +10,6 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~>5.0.0"
     }
-
   }
 
   backend "azurerm" {
@@ -22,7 +21,8 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+  }
 }
 
 provider "cloudflare" {

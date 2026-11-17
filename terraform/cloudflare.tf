@@ -2,7 +2,7 @@ resource "cloudflare_dns_record" "app" {
   zone_id = var.cloudflare_zone_id
   name    = "aamir-threatcomposer.co.uk"
   type    = "A"
-  content = "51.105.49.144"
+  content = module.application_gateway.application_gateway_public_ip
   ttl     = 1
   proxied = false
 }

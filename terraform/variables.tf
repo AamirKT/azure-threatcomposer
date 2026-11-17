@@ -16,18 +16,6 @@ variable "acr_name" {
   default     = "threatcomposer"
 }
 
-variable "sku" {
-  description = "The SKU of the Azure Container Registry"
-  type        = string
-  default     = "Standard"
-}
-
-variable "admin_enabled" {
-  description = "Whether the admin user is enabled for the Azure Container Registry"
-  type        = bool
-  default     = true
-}
-
 variable "vnet_name" {
   description = "The name of the virtual network"
   type        = string
@@ -118,24 +106,6 @@ variable "log_analytics_workspace_retention_in_days" {
   default     = 30
 }
 
-variable "acr_login_server" {
-  description = "The login server of the Azure Container Registry"
-  type        = string
-  default     = "threatcomposer.azurecr.io"
-}
-
-variable "dns_zone_name" {
-  description = "The name of the DNS zone"
-  type        = string
-  default     = "greenwave-6d7b6ee1.uksouth.azurecontainerapps.io"
-}
-
-variable "static_ip" {
-  description = "The static IP address for the DNS A record"
-  type        = string
-  default     = "10.0.2.112"
-}
-
 variable "application_gateway_name" {
   description = "The name of the application gateway"
   type        = string
@@ -166,21 +136,15 @@ variable "maximum_capacity" {
   default     = 5
 }
 
-variable "container_app_fqdn" {
-  description = "The FQDN of the container app"
-  type        = string
-  default     = "threatcomposer-app.greenwave-6d7b6ee1.uksouth.azurecontainerapps.io"
-}
-
 variable "cloudflare_zone_id" {
   description = "The ID of the Cloudflare zone"
   type        = string
 }
 
-variable "key_vault_name" {
-  description = "The name of the key vault"
+variable "key_vault_id" {
+  description = "The ID of the key vault"
   type        = string
-  default     = "aamir-threatcomposer-kv"
+  default     = "/subscriptions/548a7760-76ee-4fac-a3e1-b0ef0f645d82/resourceGroups/threatcomposer-rg/providers/Microsoft.KeyVault/vaults/aamir-threatcomposer-kv"
 }
 
 variable "app_gateway_identity_name" {
