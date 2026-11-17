@@ -41,7 +41,7 @@ resource "azurerm_federated_identity_credential" "docker" {
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = "https://token.actions.githubusercontent.com"
   user_assigned_identity_id = azurerm_user_assigned_identity.docker.id
-  subject                   = "repo:AamirKT/azure-threatcomposer:ref:refs/heads/main"
+  subject                   = "repo:AamirKT@225416033/azure-threatcomposer@1448444011:ref:refs/heads/main"
 }
 
 resource "azurerm_federated_identity_credential" "plan" {
@@ -49,14 +49,14 @@ resource "azurerm_federated_identity_credential" "plan" {
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = "https://token.actions.githubusercontent.com"
   user_assigned_identity_id = azurerm_user_assigned_identity.plan.id
-  subject                   = "repo:AamirKT/azure-threatcomposer:ref:refs/heads/main"
+  subject                   = "repo:AamirKT@225416033/azure-threatcomposer@1448444011:ref:refs/heads/main"
 }
 resource "azurerm_federated_identity_credential" "apply" {
   name                      = "apply-federated-identity"
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = "https://token.actions.githubusercontent.com"
   user_assigned_identity_id = azurerm_user_assigned_identity.apply.id
-  subject                   = "repo:AamirKT/azure-threatcomposer:environment:production"
+  subject                   = "repo:AamirKT@225416033/azure-threatcomposer@1448444011:environment:production"
 
 }
 resource "azurerm_federated_identity_credential" "destroy" {
@@ -64,7 +64,7 @@ resource "azurerm_federated_identity_credential" "destroy" {
   audience                  = ["api://AzureADTokenExchange"]
   issuer                    = "https://token.actions.githubusercontent.com"
   user_assigned_identity_id = azurerm_user_assigned_identity.destroy.id
-  subject                   = "repo:AamirKT/azure-threatcomposer:environment:destroy"
+  subject                   = "repo:AamirKT@225416033/azure-threatcomposer@1448444011:environment:destroy"
 }
 
 
