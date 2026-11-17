@@ -62,12 +62,6 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
 
-      - name: Verify Trivy Ignore File
-        run: |
-          pwd
-          ls -la .trivyignore || echo ".trivyignore not found"
-          cat .trivyignore || echo ".trivyignore not found"
-
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@v0.35.0
         with:
