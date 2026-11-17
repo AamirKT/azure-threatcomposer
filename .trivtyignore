@@ -1,0 +1,5 @@
+# libxslt vulnerabilities - temporarily accepted
+# Fixed version: 1.1.43-r4
+CVE-2026-125350
+CVE-2026-87636
+CVE-2026-9947
