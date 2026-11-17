@@ -2,8 +2,11 @@ resource "azurerm_public_ip" "application_gateway_ip" {
   name                = "${var.application_gateway_name}-ip"
   resource_group_name = var.resource_group_name
   location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
+
+  depends_on = [azurerm_role_assignment.app_gateway_key_vault]
+
+  allocation_method = "Static"
+  sku               = "Standard"
 
   tags = {
     Name = "${var.application_gateway_name}-ip"
@@ -17,7 +20,7 @@ resource "azurerm_application_gateway" "app_gateway" {
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [var.identity_id]
+    identity_ids = [azurerm_user_assigned_identity.app_gateway_identity.id]
   }
 
   sku {
@@ -123,4 +126,20 @@ resource "azurerm_application_gateway" "app_gateway" {
     backend_address_pool_name  = "container-apps-backend-pool"
     backend_http_settings_name = "container-apps-backend-http-settings"
   }
+}
+
+resource "azurerm_user_assigned_identity" "app_gateway_identity" {
+  name                = var.app_gateway_identity_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  tags = {
+    Name = var.app_gateway_identity_name
+  }
+}
+
+resource "azurerm_role_assignment" "app_gateway_key_vault" {
+  principal_id         = azurerm_user_assigned_identity.app_gateway_identity.principal_id
+  role_definition_name = "Key Vault Secrets User"
+  scope                = var.key_vault_id
 }

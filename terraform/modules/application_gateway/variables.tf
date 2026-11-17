@@ -43,12 +43,17 @@ variable "container_app_fqdn" {
   type        = string
 }
 
-variable "identity_id" {
-  description = "The ID of the user-assigned identity for the application gateway"
+variable "key_vault_secret_id" {
+  description = "The ID of the key vault secret for the SSL certificate"
   type        = string
 }
 
-variable "key_vault_secret_id" {
-  description = "The ID of the key vault secret for the SSL certificate"
+variable "app_gateway_identity_name" {
+  description = "The name of the application gateway identity"
+  type        = string
+}
+
+variable "key_vault_id" {
+  description = "The ID of the key vault"
   type        = string
 }
