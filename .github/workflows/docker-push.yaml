@@ -1,0 +1,85 @@
+name: Build and Push Docker Image to ACR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+        - 'app/**'
+
+  workflow_dispatch:
+
+env:
+  ACR_REGISTRY: ${{ vars.ACR_REGISTRY }}
+  ACR_REPOSITORY: ${{ vars.ACR_REPOSITORY }}
+
+concurrency:
+  group: "docker-push-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DOCKER }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Log in to ACR
+        run: az acr login --name ${{ env.ACR_REGISTRY }}
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set image tag
+        id: tag
+        run: |
+          SHORT_SHA=${GITHUB_SHA::8}
+          echo "IMAGE_TAG=git-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./app
+          file: ./app/Dockerfile
+          load: true
+          push: false
+          tags: local-image:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Scan Docker Image
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          image-ref: local-image:scan
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+
+      - name: Tag and Push Docker Image
+        run: |
+          IMAGE_URI=${{ env.ACR_REGISTRY }}/${{ env.ACR_REPOSITORY }}:${{ steps.tag.outputs.IMAGE_TAG }}
+          docker tag local-image:scan $IMAGE_URI
+          docker push $IMAGE_URI
+          echo "$IMAGE_URI" > image_uri.txt
+
+      - name: Upload image URI as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-uri
+          path: image_uri.txt
+
