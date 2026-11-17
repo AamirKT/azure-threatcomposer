@@ -3,7 +3,7 @@ output "container_apps_env_id" {
   value       = azurerm_container_app_environment.container_app_env.id
 }
 
-output "container_apps_env_static_ip" {
+output "container_app_env_static_ip" {
   description = "The static IP of the container apps environment"
   value       = azurerm_container_app_environment.container_app_env.static_ip_address
 }
@@ -25,11 +25,6 @@ output "container_app_latest_revision" {
 
 output "container_app_revision_fqdn" {
   description = "The FQDN of the container app's latest revision"
-  value       = azurerm_container_app.container_app.latest_revision_fqdn
-}
-
-output "container_app_url" {
-  description = "The URL of the container app"
   value       = azurerm_container_app.container_app.latest_revision_fqdn
 }
 

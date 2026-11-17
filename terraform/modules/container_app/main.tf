@@ -1,3 +1,19 @@
+resource "azurerm_user_assigned_identity" "container_app_identity" {
+  name                = "${var.container_app_name}-identity"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+
+  tags = {
+    Name = "${var.container_app_name}-identity"
+  }
+}
+
+resource "azurerm_role_assignment" "container_app_acr_pull" {
+  principal_id         = azurerm_user_assigned_identity.container_app_identity.principal_id
+  role_definition_name = "AcrPull"
+  scope                = var.acr_id
+}
+
 resource "azurerm_container_app_environment" "container_app_env" {
   name                           = var.container_app_env_name
   resource_group_name            = var.resource_group_name
@@ -26,12 +42,13 @@ resource "azurerm_container_app" "container_app" {
   workload_profile_name        = "Consumption"
 
   identity {
-    type = "SystemAssigned"
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.container_app_identity.id]
   }
 
   registry {
     server   = var.acr_login_server
-    identity = "system"
+    identity = azurerm_user_assigned_identity.container_app_identity.id
   }
 
   template {
@@ -68,6 +85,8 @@ resource "azurerm_container_app" "container_app" {
       latest_revision = true
     }
   }
+
+  depends_on = [azurerm_role_assignment.container_app_acr_pull]
 
   tags = {
     Name = var.container_app_name
