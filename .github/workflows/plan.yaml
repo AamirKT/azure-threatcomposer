@@ -5,6 +5,8 @@ on:
     workflows: ["Build and Push Docker Image to ACR"]
     types:
       - completed
+    branches:
+      - main
 
   workflow_dispatch:
 
@@ -15,7 +17,15 @@ concurrency:
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.head_branch == 'main'
+        )
+        }}
 
     permissions:
       contents: read
@@ -37,13 +47,19 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set image URI as environment variable
+        shell: bash
         run: |
-          if [ "${{ github.event_name }}" == "workflow_run" ]; then
-            echo "TF_VAR_container_image=$(cat image-uri.txt)" >> $GITHUB_ENV
-            else
-            SHORT_SHA=${GITHUB_SHA::8}
-            echo "TF_VAR_container_image=${{ vars.ACR_REGISTRY }}/${{ vars.ACR_REPOSITORY }}:git-${SHORT_SHA}" >> $GITHUB_ENV
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            IMAGE_URI=$(cat image-uri.txt)
+          else
+            SHORT_SHA="${GITHUB_SHA::8}"
+            IMAGE_URI="${{ vars.ACR_REGISTRY }}/${{ vars.ACR_REPOSITORY }}:git-${SHORT_SHA}"
           fi
+          echo "TF_VAR_container_image=${IMAGE_URI}" >> "$GITHUB_ENV"
+          echo "${IMAGE_URI}" > image-uri.txt
+          echo "Planning deployment for: ${IMAGE_URI}"
 
       - name: Configure Azure credentials via OIDC
         uses: azure/login@v2
@@ -106,3 +122,5 @@ jobs:
           path: |
             terraform/tfplan
             image-uri.txt
+          if-no-files-found: error
+          retention-days: 1
