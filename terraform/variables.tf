@@ -141,6 +141,12 @@ variable "cloudflare_zone_id" {
   type        = string
 }
 
+variable "cloudflare_api_token" {
+  description = "The API token for Cloudflare"
+  type        = string
+  sensitive   = true
+}
+
 variable "key_vault_id" {
   description = "The ID of the key vault"
   type        = string
