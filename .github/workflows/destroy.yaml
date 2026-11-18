@@ -1,0 +1,80 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: 'Confirm Terraform destroy'
+        required: true
+        type: string
+        default: 'no'
+
+concurrency:
+  group: terraform-destroy
+  cancel-in-progress: false
+
+jobs:
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    environment: destroy
+
+    permissions:
+      contents: read
+      id-token: write
+      
+
+    steps:
+      - name: Confirm Destroy
+        env:
+          CONFIRM_DESTROY: ${{ inputs.confirm_destroy }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$CONFIRM_DESTROY" != "DESTROY" ]]; then
+            echo "Destruction not confirmed. You must type DESTROY."
+            exit 1
+          fi
+
+          echo "Destruction confirmed."
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Configure Azure credentials via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID_DESTROY }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+
+      - name: Setup Terraform 
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.14.3
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Destroy Plan
+        working-directory: terraform
+        env:
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: terraform plan -destroy -input=false -lock-timeout=5m -out=destroy.tfplan
+
+      - name: Terraform Show Destroy Plan
+        working-directory: terraform
+        run: terraform show -no-color destroy.tfplan
+
+      - name: Terraform Destroy
+        working-directory: terraform
+        env:
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: terraform destroy -auto-approve -input=false -auto-approve destroy.tfplan
