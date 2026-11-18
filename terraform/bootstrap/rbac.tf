@@ -12,6 +12,13 @@ resource "azurerm_role_assignment" "plan_reader" {
   skip_service_principal_aad_check = true
 }
 
+resource "azurerm_role_assignment" "plan_storage_reader" {
+  scope                            = azurerm_storage_account.tfstate.id
+  role_definition_name             = "Reader"
+  principal_id                     = azurerm_user_assigned_identity.plan.principal_id
+  skip_service_principal_aad_check = true
+}
+
 resource "azurerm_role_assignment" "plan_state" {
   scope                            = azurerm_storage_container.tfstate.id
   role_definition_name             = "Storage Blob Data Contributor"
