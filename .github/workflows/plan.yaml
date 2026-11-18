@@ -90,6 +90,8 @@ jobs:
 
       - name: Terraform Plan
         working-directory: terraform
+        env:
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
         run: terraform plan -input=false -lock-timeout=5m -out=tfplan
 
       - name: Terraform Show
