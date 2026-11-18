@@ -17,6 +17,9 @@ terraform {
     storage_account_name = "aamirstorage"
     container_name       = "tfstate"
     key                  = "threatcomposer/terraform.tfstate"
+
+    use_azuread_auth = true
+    use_oidc         = true
   }
 }
 
