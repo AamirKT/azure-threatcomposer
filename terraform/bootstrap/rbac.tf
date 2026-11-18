@@ -67,3 +67,29 @@ resource "azurerm_role_assignment" "destroy_state" {
   principal_id                     = azurerm_user_assigned_identity.destroy.principal_id
   skip_service_principal_aad_check = true
 }
+
+data "azurerm_subscription" "current" {}
+
+resource "azurerm_role_definition" "container_app_secrets_reader" {
+  name        = "Threat Composer Container App Secrets Reader"
+  scope       = data.azurerm_subscription.current.id
+  description = "Allows Terraform Plan to retrieve Container App secrets."
+
+  permissions {
+    actions = [
+      "Microsoft.App/containerApps/listSecrets/action"
+    ]
+    not_actions = []
+  }
+
+  assignable_scopes = [
+    data.azurerm_subscription.current.id
+  ]
+}
+
+resource "azurerm_role_assignment" "plan_container_app_secrets" {
+  scope                            = azurerm_resource_group.main.id
+  role_definition_id               = azurerm_role_definition.container_app_secrets_reader.role_definition_resource_id
+  principal_id                     = azurerm_user_assigned_identity.plan.principal_id
+  skip_service_principal_aad_check = true
+}
