@@ -57,7 +57,7 @@ jobs:
             SHORT_SHA="${GITHUB_SHA::8}"
             IMAGE_URI="${{ vars.ACR_REGISTRY }}/${{ vars.ACR_REPOSITORY }}:git-${SHORT_SHA}"
           fi
-          echo "TF_VAR_container_image=${IMAGE_URI}" >> "$GITHUB_ENV"
+          echo "TF_VAR_container_app_image=${IMAGE_URI}" >> "$GITHUB_ENV"
           echo "${IMAGE_URI}" > image-uri.txt
           echo "Planning deployment for: ${IMAGE_URI}"
 
